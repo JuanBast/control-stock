@@ -1,0 +1,44 @@
+version: "2.4"
+services: 
+    mongo:
+        build: ./mongo-db/mongo
+        healthcheck:
+          test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+          timeout: 45s
+          interval: 10s
+          retries: 10
+        restart: always
+        volumes: 
+          - ./mongo-db/mongo-data:/data/db:delegated
+        ports: 
+            - "27017:27017"
+
+    backend:
+        build: ./backend/
+        command: /app/node_modules/.bin/nodemon /app/src/index.js
+        ports: 
+            - 4000:4000
+        volumes: 
+            - ./backend:/app
+        environment: 
+            - NODE_ENV=development
+            - PORT=4000
+            - LOGGER_LEVEL=debug
+            - MONGO_URI=mongodb://mongo:27017/stock
+        depends_on: 
+            mongo:
+                condition: service_healthy
+    
+    frontend:
+        build: ./frontend/
+        command: npm start
+        volumes: 
+            - ./frontend:/app
+        stdin_open: true
+        ports: 
+            - 3000:3000
+        environment: 
+            - BACKEND_URL=http://localhost:4000
+        # depends_on: 
+        #     backend:
+        #         condition: service_healthy
