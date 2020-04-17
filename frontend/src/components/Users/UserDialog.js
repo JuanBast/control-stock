@@ -1,58 +1,54 @@
-import React, { useState, useEffect } from "react";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Slide from "@material-ui/core/Slide";
-import TextField from "@material-ui/core/TextField";
+import React, { useContext } from "react";
 
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
-
-import Avatar from "@material-ui/core/Avatar";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Slide,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Avatar,
+} from "@material-ui/core";
 
 import axios from "axios";
+
+import { UserContext } from "./UserContext";
+import { getRandomColor } from '../../utils/'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function UserDialog({
-  open,
-  closeUserDialog,
-  user,
-  userAction,
-}) {
-    
-  const [roles, setRoles] = useState([]);
-  useEffect(() => {
-    if (userAction === "edit") {
-      async function getRoles() {
-        const result = await axios.get("http://localhost:4000/api/v1/role");
-        setRoles(result.data);
-      }
-      getRoles();
-      console.log(roles);
-    }
-    // eslint-disable-next-line
-  }, []);
-
-  const handleClose = () => {
-    closeUserDialog();
-  };
+export default function UserDialog() {
+  const {
+    // usersData: { users, setUsers },
+    rolesData: {
+      roles,
+      // setRoles
+    },
+    userDialog: { userDialogOpen, setUserDialogOpen },
+    currentUser: { userSelected, setUserSelected },
+    currentAction: { userAction, setUserAction },
+    // currentAction: { userAction },
+    currentRenderFlag: { renderFlag, setRenderFlag },
+  } = useContext(UserContext);
 
   const prettyTimeStamp = (timestamp) => {
-    // const date = timestamp.substring(0, 10);
-    // const time = timestamp.substring(11, timestamp.length - 1);
-    // return `${date} ${time}`;
     var date = new Date(timestamp);
+
     var curr_date = date.getDate();
     var curr_month = date.getMonth();
     var curr_year = date.getFullYear();
@@ -60,6 +56,7 @@ export default function UserDialog({
     var curr_hour = date.getHours();
     var curr_minutes = date.getMinutes();
     var curr_seconds = date.getSeconds();
+
     return `${curr_date}-${curr_month}-${curr_year} ${curr_hour}:${curr_minutes}:${curr_seconds}`;
   };
 
@@ -77,24 +74,85 @@ export default function UserDialog({
     updatedAt,
   } = "";
 
-  if (user) {
-    _id = user._id;
-    name = user.name;
-    surname = user.surname;
-    dni = user.dni;
-    email = user.email;
-    address = user.address;
-    telephone = user.telephone;
-    username = user.username;
-    rolename = user.role.rolename.toUpperCase();
-    createdAt = prettyTimeStamp(user.createdAt);
-    updatedAt = prettyTimeStamp(user.updatedAt);
+  if (userSelected) {
+    _id = userSelected._id;
+    name = userSelected.name;
+    surname = userSelected.surname;
+    dni = userSelected.dni;
+    email = userSelected.email;
+    address = userSelected.address;
+    telephone = userSelected.telephone;
+    username = userSelected.username;
+
+    // if(undefined !== userSelected.role.rolename)
+    // if(("rolename" in userSelected.role)){
+    if (typeof userSelected.role != "undefined") {
+      rolename = userSelected.role.rolename.toUpperCase();
+    } else {
+      rolename = "";
+    }
+    // rolename = undefined !== userSelected.role.rolename ? userSelected.role.rolename.toUpperCase() : "";
+    createdAt = prettyTimeStamp(userSelected.createdAt);
+    updatedAt = prettyTimeStamp(userSelected.updatedAt);
   }
+
+  const handleClose = () => {
+    setUserDialogOpen(false);
+    setUserAction();
+    setUserSelected();
+    setRenderFlag(renderFlag + 1);
+  };
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    let newValue = value;
+    if (name === "role") {
+      const newRole = roles.filter((role) => role.rolename === value);
+      newValue = {
+        _id: newRole[0]._id,
+        rolename: newRole[0].rolename,
+      };
+    }
+    setUserSelected({
+      ...userSelected,
+      [name]: newValue,
+    });
+  };
+
+  const handleSubmit = async () => {
+    const newRole = roles.filter(
+      (role) => role.rolename === userSelected.role.rolename
+    );
+    const newIdRole = {
+      _id: newRole[0]._id,
+      rolename: newRole[0].rolename,
+    };
+    const newUser = {
+      ...userSelected,
+      role: newIdRole,
+    };
+    if (userAction === "edit") {
+      await axios.put(
+        "http://localhost:4000/api/v1/user/" + newUser._id,
+        newUser
+      );
+    } else if (userAction === "add") {
+      await axios.post("http://localhost:4000/api/v1/user", newUser);
+    }
+
+    // setUsers([...users.filter((user) => user._id !== newUser._id), newUser]);
+    handleClose();
+    // refreshPage();
+  };
+
+//   const refreshPage = () => {
+//     window.location.reload(false);
+//   };
 
   return (
     <div>
       <Dialog
-        open={open}
+        open={userDialogOpen}
         TransitionComponent={Transition}
         keepMounted
         onClose={handleClose}
@@ -102,14 +160,17 @@ export default function UserDialog({
         aria-describedby="alert-dialog-slide-description"
       >
         <DialogTitle id="alert-dialog-slide-title" align="center">
-          {/* <AccountCircleIcon fontSize="large" /> */}
-          <Avatar>
-            {user ? `${name.charAt(0)}${surname.charAt(0)}` : "U"}
+          <Avatar
+            style={{background: getRandomColor()}}
+          >
+            {userAction === undefined || userAction === "add"
+              ? "U?"
+              : `${name.charAt(0).toUpperCase()}${surname
+                  .charAt(0)
+                  .toUpperCase()}`}
           </Avatar>
-
-          <br />
           <DialogContentText id="alert-dialog-slide-description" align="center">
-            Datos del usuario {name + " " + surname}
+            Datos del usuario
           </DialogContentText>
         </DialogTitle>
         <DialogContent>
@@ -137,6 +198,7 @@ export default function UserDialog({
                       fullWidth
                       value={name}
                       inputProps={{ style: { textAlign: "right" } }}
+                      onChange={handleChange}
                     />
                   </TableCell>
                 </TableRow>
@@ -155,6 +217,7 @@ export default function UserDialog({
                       fullWidth
                       value={surname}
                       inputProps={{ style: { textAlign: "right" } }}
+                      onChange={handleChange}
                     />
                   </TableCell>
                 </TableRow>
@@ -173,6 +236,7 @@ export default function UserDialog({
                       fullWidth
                       value={dni}
                       inputProps={{ style: { textAlign: "right" } }}
+                      onChange={handleChange}
                     />
                   </TableCell>
                 </TableRow>
@@ -191,6 +255,7 @@ export default function UserDialog({
                       fullWidth
                       value={address}
                       inputProps={{ style: { textAlign: "right" } }}
+                      onChange={handleChange}
                     />
                   </TableCell>
                 </TableRow>
@@ -209,6 +274,7 @@ export default function UserDialog({
                       fullWidth
                       value={telephone}
                       inputProps={{ style: { textAlign: "right" } }}
+                      onChange={handleChange}
                     />
                   </TableCell>
                 </TableRow>
@@ -227,6 +293,7 @@ export default function UserDialog({
                       fullWidth
                       value={email}
                       inputProps={{ style: { textAlign: "right" } }}
+                      onChange={handleChange}
                     />
                   </TableCell>
                 </TableRow>
@@ -245,6 +312,7 @@ export default function UserDialog({
                       fullWidth
                       value={username}
                       inputProps={{ style: { textAlign: "right" } }}
+                      onChange={handleChange}
                     />
                   </TableCell>
                 </TableRow>
@@ -253,55 +321,80 @@ export default function UserDialog({
                     Rol
                   </TableCell>
                   <TableCell align="right">
-                    <TextField
-                      autoFocus
-                      margin="dense"
-                      id="user_rolename"
-                      name="rolename"
-                      type="string"
-                      disabled={userAction === "view"}
-                      fullWidth
-                      value={rolename}
-                      inputProps={{ style: { textAlign: "right" } }}
-                    />
+                    {userAction === "view" ? (
+                      <TextField
+                        autoFocus
+                        margin="dense"
+                        id="user_rolename"
+                        name="rolename"
+                        type="string"
+                        disabled={userAction === "view"}
+                        fullWidth
+                        value={rolename}
+                        inputProps={{ style: { textAlign: "right" } }}
+                      />
+                    ) : (
+                      <FormControl>
+                        <InputLabel id="demo-simple-select-label">
+                          Rol
+                        </InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={rolename ? rolename.toLowerCase() : ""}
+                          onChange={handleChange}
+                          name="role"
+                        >
+                          {roles.map((role) => (
+                            <MenuItem value={role.rolename} key={role.rolename}>
+                              {role.rolename.toUpperCase()}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
                   </TableCell>
                 </TableRow>
-                <TableRow key={_id + "9"}>
-                  <TableCell component="th" scope="row">
-                    Creado el
-                  </TableCell>
-                  <TableCell align="right">
-                    <TextField
-                      autoFocus
-                      margin="dense"
-                      id="user_createdAt"
-                      name="createdAt"
-                      type="string"
-                      disabled={true}
-                      fullWidth
-                      value={createdAt}
-                      inputProps={{ style: { textAlign: "right" } }}
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow key={_id + "10"}>
-                  <TableCell component="th" scope="row">
-                    Modificado el
-                  </TableCell>
-                  <TableCell align="right">
-                    <TextField
-                      autoFocus
-                      margin="dense"
-                      id="user_updatedAt"
-                      name="updatedAt"
-                      type="string"
-                      disabled={true}
-                      fullWidth
-                      value={updatedAt}
-                      inputProps={{ style: { textAlign: "right" } }}
-                    />
-                  </TableCell>
-                </TableRow>
+                {userAction !== undefined && userAction !== "add" ? (
+                  <React.Fragment>
+                    <TableRow key={_id + "9"}>
+                      <TableCell component="th" scope="row">
+                        Creado el
+                      </TableCell>
+                      <TableCell align="right">
+                        <TextField
+                          autoFocus
+                          margin="dense"
+                          id="user_createdAt"
+                          name="createdAt"
+                          type="string"
+                          disabled={true}
+                          fullWidth
+                          value={createdAt}
+                          inputProps={{ style: { textAlign: "right" } }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow key={_id + "10"}>
+                      <TableCell component="th" scope="row">
+                        Modificado el
+                      </TableCell>
+                      <TableCell align="right">
+                        <TextField
+                          autoFocus
+                          margin="dense"
+                          id="user_updatedAt"
+                          name="updatedAt"
+                          type="string"
+                          disabled={true}
+                          fullWidth
+                          value={updatedAt}
+                          inputProps={{ style: { textAlign: "right" } }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                ) : null}
               </TableBody>
             </Table>
           </TableContainer>
@@ -310,7 +403,7 @@ export default function UserDialog({
           <Button color="primary" onClick={handleClose}>
             Cancelar
           </Button>
-          <Button color="primary" onClick={handleClose}>
+          <Button color="primary" onClick={handleSubmit}>
             Aceptar
           </Button>
         </DialogActions>

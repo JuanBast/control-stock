@@ -2,9 +2,10 @@ const categoriesCtrl = {};
 const Category = require('../models/Category');
 
 categoriesCtrl.createCategory = async (req, res) => {
-    const { name } = req.body;
+    const { name, description } = req.body;
     const newCategory = new Category({
-        name
+        name,
+        description
     });
     await newCategory.save();
     res.json({ message: 'Category saved' });
@@ -12,9 +13,10 @@ categoriesCtrl.createCategory = async (req, res) => {
 
 categoriesCtrl.updateCategory = async (req, res) => {
     const id = req.params.id;
-    const { name } = req.body;
+    const { name, description } = req.body;
     await Category.findByIdAndUpdate(id, {
-        name
+        name,
+        description
     });
     res.json({ message: 'Category updated' });
 }

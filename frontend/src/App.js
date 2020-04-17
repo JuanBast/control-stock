@@ -4,9 +4,9 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { CssBaseline } from "@material-ui/core";
 
 import Products from "./components/Products";
-import Categories from "./components/Categories";
+import Categories from "./components/Categories/";
 import Users from "./components/Users/";
-import Roles from "./components/Roles";
+import Roles from "./components/Roles/";
 import Suppliers from "./components/Suppliers";
 import Sales from "./components/Sales";
 import Navigation from "./components/Navigation/Navigation";
