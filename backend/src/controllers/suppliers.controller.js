@@ -2,11 +2,11 @@ const suppliersCtrl = {};
 const Supplier = require('../models/Supplier');
 
 suppliersCtrl.createSupplier = async (req, res) => {
-    const { name, cuit, mail, address, telephone } = req.body;
+    const { name, cuit, email, address, telephone } = req.body;
     const newSupplier = new Supplier({
         name, 
         cuit, 
-        mail, 
+        email, 
         address, 
         telephone
     });
@@ -16,11 +16,11 @@ suppliersCtrl.createSupplier = async (req, res) => {
 
 suppliersCtrl.updateSupplier = async (req, res) => {
     const id = req.params.id;
-    const { name, cuit, mail, address, telephone } = req.body;
+    const { name, cuit, email, address, telephone } = req.body;
     await Supplier.findByIdAndUpdate(id, {
         name, 
         cuit, 
-        mail, 
+        email, 
         address, 
         telephone
     });

@@ -18,48 +18,47 @@ import EditRoundedIcon from "@material-ui/icons/EditRounded";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 
-import CategoryContext from "./CategoryContext";
-import CategoryController from "./CategoryController";
-
+import SupplierContext from "./SupplierContext";
+import SupplierController from "./SupplierController";
 import ConfirmDialog from "../Common/ConfirmDialog";
 
 import { getRandomColor } from "../../utils/";
 
-function CategoryTable() {
+export default function SupplierTable() {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const {
-    reloadFlagMemo: { reloadFlag, setReloadFlag },
-    categoriesMemo: {
-      categories,
-      // setCategories
+    suppliersMemo: {
+      suppliers,
+      // setSuppliers
     },
-    categorySelectedMemo: { categorySelected, setCategorySelected },
+    supplierSelectedMemo: { supplierSelected, setSupplierSelected },
     currentAction: {
-      // categoryAction,
-      setCategoryAction,
+      // supplierAction,
+      setSupplierAction,
     },
-  } = useContext(CategoryContext);
+    reloadFlagMemo: { reloadFlag, setReloadFlag },
+  } = useContext(SupplierContext);
 
-  const onView = (category) => {
-    setCategorySelected(category);
-    setCategoryAction("view");
+  const onView = (supplier) => {
+    setSupplierSelected(supplier);
+    setSupplierAction("view");
   };
 
-  const onEdit = (category) => {
-    setCategorySelected(category);
-    setCategoryAction("edit");
+  const onEdit = (supplier) => {
+    setSupplierSelected(supplier);
+    setSupplierAction("edit");
   };
 
-  const onDelete = (category) => {
-    setCategorySelected(category);
+  const onDelete = (supplier) => {
+    setSupplierSelected(supplier);
     setConfirmOpen(true);
   };
 
-  const deleteCategory = async () => {
-    await CategoryController.deleteCategory(categorySelected._id);
-    setCategoryAction(undefined);
-    setCategorySelected({});
+  const deleteSupplier = async () => {
+    await SupplierController.deleteSupplier(supplierSelected._id);
+    setSupplierAction(undefined);
+    setSupplierSelected({});
     setReloadFlag(reloadFlag + 1);
   };
 
@@ -69,38 +68,41 @@ function CategoryTable() {
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell align="left"></TableCell>
+              <TableCell align="center"></TableCell>
               <TableCell align="left">Nombre</TableCell>
-              <TableCell align="right">Desciption</TableCell>
+              <TableCell align="right">CUIT</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {categories.map((category) => (
-              <TableRow key={category._id}>
+            {suppliers.map((supplier) => (
+              <TableRow key={supplier._id}>
                 <TableCell align="center">
                   <Avatar style={{ background: getRandomColor() }}>
-                    {`${category.name.charAt(0).toUpperCase()}`}
+                    {`${supplier.name
+                      .charAt(0)
+                      .toUpperCase()}${supplier.name.charAt(1).toUpperCase()}`}
                   </Avatar>
                 </TableCell>
+
                 <TableCell component="th" scope="row">
-                  {category.name}
+                  {supplier.name}
                 </TableCell>
-                <TableCell align="right">{category.description}</TableCell>
+                <TableCell align="right">{supplier.cuit}</TableCell>
                 <TableCell align="right">
-                  <Tooltip title="Ver categoría" arrow>
-                    <IconButton onClick={() => onView(category)}>
+                  <Tooltip title="Ver proveedor" arrow>
+                    <IconButton onClick={() => onView(supplier)}>
                       <VisibilityIcon color="primary" />
                     </IconButton>
                   </Tooltip>
 
-                  <Tooltip title="Editar categoría" arrow>
-                    <IconButton onClick={() => onEdit(category)}>
+                  <Tooltip title="Editar proveedor" arrow>
+                    <IconButton onClick={() => onEdit(supplier)}>
                       <EditRoundedIcon color="primary" />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="Eliminar categoría" arrow>
-                    <IconButton onClick={() => onDelete(category)}>
+                  <Tooltip title="Eliminar proveedor" arrow>
+                    <IconButton onClick={() => onDelete(supplier)}>
                       <DeleteIcon color="primary" />
                     </IconButton>
                   </Tooltip>
@@ -112,10 +114,10 @@ function CategoryTable() {
       </TableContainer>
 
       <ConfirmDialog
-        title="Borrar Categoría?"
+        title="Borrar Proveedor?"
         open={confirmOpen}
         setOpen={setConfirmOpen}
-        onConfirm={deleteCategory}
+        onConfirm={deleteSupplier}
       >
         <TableContainer>
           <Table aria-label="simple table">
@@ -125,7 +127,7 @@ function CategoryTable() {
                   <HighlightOffIcon color="secondary" />
                 </TableCell>
                 <TableCell align="right">
-                  Desea eliminar la categoría?
+                  Desea eliminar el proveedor?
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -135,5 +137,3 @@ function CategoryTable() {
     </div>
   );
 }
-
-export default CategoryTable;

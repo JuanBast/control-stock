@@ -1,3 +1,7 @@
 import { createContext } from 'react'
 
-export const CategoryContext = createContext();
+const CategoryContext = createContext();
+
+CategoryContext.displayName = "CategoryContext";
+
+export default CategoryContext;

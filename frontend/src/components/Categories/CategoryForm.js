@@ -2,12 +2,7 @@ import React, { useContext } from "react";
 import axios from "axios";
 import {
   TextField,
-  //   InputLabel,
-  //   Select,
-  //   MenuItem,
-  FormControl,
   Button,
-  IconButton,
   TableContainer,
   Paper,
   Table,
@@ -19,7 +14,7 @@ import {
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
 
-import { CategoryContext } from "./CategoryContext";
+import CategoryContext from "./CategoryContext";
 
 const CategoryForm = () => {
   const {
@@ -41,18 +36,33 @@ const CategoryForm = () => {
   };
 
   const handleSubmit = async () => {
-    await axios.put(
-      "http://localhost:4000/api/v1/category/" + categorySelected._id,
-      categorySelected
-    );
+
+    if (categoryAction === "view") {
+        handleCancel();
+    }
+
+    if (categoryAction === "add") {
+      await axios.post(
+        "http://localhost:4000/api/v1/category/",
+        categorySelected
+      );
+    }
+
+    if (categoryAction === "edit") {
+      await axios.put(
+        "http://localhost:4000/api/v1/category/" + categorySelected._id,
+        categorySelected
+      );
+    }
     setCategoryAction(undefined);
+    setCategorySelected({});
     setReloadFlag(reloadFlag + 1);
   };
 
   const handleCancel = () => {
     setCategoryAction(undefined);
-    setCategorySelected();
-  }
+    setCategorySelected({});
+  };
 
   return (
     <div>
@@ -75,7 +85,12 @@ const CategoryForm = () => {
                   type="string"
                   disabled={categoryAction === "view"}
                   fullWidth
-                  value={categorySelected.name}
+                  value={
+                    typeof categorySelected !== undefined &&
+                    typeof categorySelected.name !== undefined
+                      ? categorySelected.name
+                      : ""
+                  }
                   inputProps={{ style: { textAlign: "right" } }}
                   onChange={handleChange}
                 />
@@ -92,7 +107,12 @@ const CategoryForm = () => {
                   type="string"
                   disabled={categoryAction === "view"}
                   fullWidth
-                  value={categorySelected.description}
+                  value={
+                    typeof categorySelected !== undefined &&
+                    typeof categorySelected.description !== undefined
+                      ? categorySelected.description
+                      : ""
+                  }
                   inputProps={{ style: { textAlign: "right" } }}
                   onChange={handleChange}
                   multiline
@@ -101,18 +121,68 @@ const CategoryForm = () => {
               </TableCell>
             </TableRow>
 
+            {categoryAction === "view" ? (
+              <React.Fragment>
+                <TableRow key={3}>
+                  <TableCell align="left">Creado el</TableCell>
+                  <TableCell align="right">
+                    <TextField
+                      margin="dense"
+                      id="category_createdAt"
+                      name="createdAt"
+                      type="string"
+                      disabled={true}
+                      fullWidth
+                      value={
+                        typeof categorySelected !== undefined &&
+                        typeof categorySelected.createdAt !== undefined
+                          ? categorySelected.createdAt
+                          : ""
+                      }
+                      inputProps={{ style: { textAlign: "right" } }}
+                    />
+                  </TableCell>
+                </TableRow>
+
+                <TableRow key={4}>
+                  <TableCell align="left">Modificado el</TableCell>
+                  <TableCell align="right">
+                    <TextField
+                      margin="dense"
+                      id="category_updatedAt"
+                      name="updatedAt"
+                      type="string"
+                      disabled={true}
+                      fullWidth
+                      value={
+                        typeof categorySelected !== undefined &&
+                        typeof categorySelected.updatedAt !== undefined
+                          ? categorySelected.updatedAt
+                          : ""
+                      }
+                      inputProps={{ style: { textAlign: "right" } }}
+                    />
+                  </TableCell>
+                </TableRow>
+              </React.Fragment>
+            ) : null}
+
             <TableRow key="buttons">
               <TableCell align="center">
-                <Button variant="contained" color="primary"
-                    onClick={handleSubmit}
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSubmit}
                 >
                   <CheckIcon />
                   Aceptar
                 </Button>
               </TableCell>
               <TableCell align="center">
-                <Button variant="contained" color="secondary"
-                    onClick={handleCancel}
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleCancel}
                 >
                   <CloseIcon />
                   Cancelar

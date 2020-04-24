@@ -2,9 +2,10 @@ const rolesCtrl = {};
 const Role = require('../models/Role');
 
 rolesCtrl.createRole = async (req, res) => {
-    const { rolename } = req.body;
+    const { rolename, description } = req.body;
     const newRole = new Role({
-        rolename
+        rolename,
+        description
     });
     await newRole.save();
     res.json({ message: "Role created!"});
@@ -12,9 +13,10 @@ rolesCtrl.createRole = async (req, res) => {
 
 rolesCtrl.updateRole = async (req, res) => {
     const id = req.params.id;
-    const { rolename } = req.body;
+    const { rolename, description } = req.body;
     await Role.findByIdAndUpdate(id, {
-        rolename
+        rolename,
+        description
     });
     res.json({ message: "Role updated!"});
 }

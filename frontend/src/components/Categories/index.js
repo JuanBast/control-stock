@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
 
 import CategoryPage from "./CategoryPage";
-import { CategoryContext } from "./CategoryContext";
+import CategoryContext from "./CategoryContext";
+import CategoryController from "./CategoryController"
 
 const Categories = () => {
   const [reloadFlag, setReloadFlag] = useState(1);
@@ -19,7 +19,7 @@ const Categories = () => {
 
   useEffect(() => {
     async function getCategories() {
-      const result = await axios.get("http://localhost:4000/api/v1/category");
+      const result = await CategoryController.getAllCategories();
       setCategories(result.data);
     }
     getCategories();

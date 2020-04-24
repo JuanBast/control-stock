@@ -18,48 +18,47 @@ import EditRoundedIcon from "@material-ui/icons/EditRounded";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 
-import CategoryContext from "./CategoryContext";
-import CategoryController from "./CategoryController";
-
+import RoleContext from "./RoleContext";
+import RoleController from "./RoleController";
 import ConfirmDialog from "../Common/ConfirmDialog";
 
 import { getRandomColor } from "../../utils/";
 
-function CategoryTable() {
+export default function RoleTable() {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const {
+    rolesMemo: {
+      roles,
+      // setRoles
+    },
+    roleSelectedMemo: { roleSelected, setRoleSelected },
+    roleActionMemo: {
+      // roleAction,
+      setRoleAction,
+    },
     reloadFlagMemo: { reloadFlag, setReloadFlag },
-    categoriesMemo: {
-      categories,
-      // setCategories
-    },
-    categorySelectedMemo: { categorySelected, setCategorySelected },
-    currentAction: {
-      // categoryAction,
-      setCategoryAction,
-    },
-  } = useContext(CategoryContext);
+  } = useContext(RoleContext);
 
-  const onView = (category) => {
-    setCategorySelected(category);
-    setCategoryAction("view");
+  const onView = (role) => {
+    setRoleAction("view");
+    setRoleSelected(role);
   };
 
-  const onEdit = (category) => {
-    setCategorySelected(category);
-    setCategoryAction("edit");
+  const onEdit = (role) => {
+    setRoleAction("edit");
+    setRoleSelected(role);
   };
 
-  const onDelete = (category) => {
-    setCategorySelected(category);
+  const onDelete = (role) => {
+    setRoleSelected(role);
     setConfirmOpen(true);
   };
 
-  const deleteCategory = async () => {
-    await CategoryController.deleteCategory(categorySelected._id);
-    setCategoryAction(undefined);
-    setCategorySelected({});
+  const deleteRole = async () => {
+    await RoleController.deleteRole(roleSelected._id);
+    setRoleAction(undefined);
+    setRoleSelected({});
     setReloadFlag(reloadFlag + 1);
   };
 
@@ -71,36 +70,37 @@ function CategoryTable() {
             <TableRow>
               <TableCell align="left"></TableCell>
               <TableCell align="left">Nombre</TableCell>
-              <TableCell align="right">Desciption</TableCell>
+              <TableCell align="right">Descripción</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {categories.map((category) => (
-              <TableRow key={category._id}>
+            {roles.map((role) => (
+              <TableRow key={role._id}>
                 <TableCell align="center">
                   <Avatar style={{ background: getRandomColor() }}>
-                    {`${category.name.charAt(0).toUpperCase()}`}
+                    {`${role.rolename.charAt(0).toUpperCase()}`}
                   </Avatar>
                 </TableCell>
+
                 <TableCell component="th" scope="row">
-                  {category.name}
+                  {role.rolename}
                 </TableCell>
-                <TableCell align="right">{category.description}</TableCell>
+                <TableCell align="right">{role.description}</TableCell>
                 <TableCell align="right">
-                  <Tooltip title="Ver categoría" arrow>
-                    <IconButton onClick={() => onView(category)}>
+                  <Tooltip title="Ver rol" arrow>
+                    <IconButton onClick={() => onView(role)}>
                       <VisibilityIcon color="primary" />
                     </IconButton>
                   </Tooltip>
 
-                  <Tooltip title="Editar categoría" arrow>
-                    <IconButton onClick={() => onEdit(category)}>
+                  <Tooltip title="Editar rol" arrow>
+                    <IconButton onClick={() => onEdit(role)}>
                       <EditRoundedIcon color="primary" />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="Eliminar categoría" arrow>
-                    <IconButton onClick={() => onDelete(category)}>
+                  <Tooltip title="Eliminar rol" arrow>
+                    <IconButton onClick={() => onDelete(role)}>
                       <DeleteIcon color="primary" />
                     </IconButton>
                   </Tooltip>
@@ -112,10 +112,10 @@ function CategoryTable() {
       </TableContainer>
 
       <ConfirmDialog
-        title="Borrar Categoría?"
+        title="Borrar Rol?"
         open={confirmOpen}
         setOpen={setConfirmOpen}
-        onConfirm={deleteCategory}
+        onConfirm={deleteRole}
       >
         <TableContainer>
           <Table aria-label="simple table">
@@ -124,9 +124,7 @@ function CategoryTable() {
                 <TableCell align="left">
                   <HighlightOffIcon color="secondary" />
                 </TableCell>
-                <TableCell align="right">
-                  Desea eliminar la categoría?
-                </TableCell>
+                <TableCell align="right">Desea eliminar el Rol?</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -135,5 +133,3 @@ function CategoryTable() {
     </div>
   );
 }
-
-export default CategoryTable;

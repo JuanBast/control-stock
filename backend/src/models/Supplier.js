@@ -10,7 +10,7 @@ const supplierSchema = new Schema({
         type: Number,
         required: true,
     },
-    mail: {
+    email: {
         type: String,
         required: true,
         trim: true

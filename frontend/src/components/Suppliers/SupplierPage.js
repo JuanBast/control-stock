@@ -3,11 +3,10 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import { Paper } from "@material-ui/core";
 
-import CategoryContext from "./CategoryContext";
-import CategoryForm from "./CategoryForm";
-
-import CategoryHeadPane from "./CategoryHeadPane";
-import CategoryTable from "./CategoryTable";
+import SupplierContext from "./SupplierContext";
+import SupplierForm from "./SupplierForm";
+import SupplierHeadPane from "./SupplierHeadPane";
+import SupplierTable from "./SupplierTable";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -17,22 +16,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function CategoryPage() {
+export default function SupplierPage() {
   const classes = useStyles();
 
   const {
-    currentAction: { categoryAction },
-  } = useContext(CategoryContext);
+    currentAction: { supplierAction },
+  } = useContext(SupplierContext);
 
   return (
     <div className={classes.root}>
       <Paper elevation={3}>
         <div style={{ flexGrow: 1 }}>
-          <CategoryHeadPane />
+          <SupplierHeadPane />
           {
-            categoryAction === undefined
-            ? <CategoryTable /> 
-            : <CategoryForm />
+            supplierAction === undefined
+            ? <SupplierTable /> 
+            : <SupplierForm />
           }
         </div>
       </Paper>

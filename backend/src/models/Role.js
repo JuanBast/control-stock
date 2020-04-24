@@ -4,6 +4,10 @@ const roleSchema = new Schema({
     rolename: {
         type: String,
         required: true
+    },
+    description: {
+        type: String,
+        required: true
     }
 },{
     timestamps: true

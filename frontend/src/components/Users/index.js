@@ -1,76 +1,66 @@
 import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
+
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import UserPage from "./UserPage";
-
-import { UserContext } from "./UserContext";
+import UserContext from "./UserContext";
+import UserController from "./UserController";
+import RoleController from "../Roles/RoleController";
 
 const Users = () => {
-  // Set re-render flag
-  const [renderFlag, setRenderFlag] = useState(1);
-  const currentRenderFlag = useMemo(() => ({ renderFlag, setRenderFlag }), [
-    renderFlag,
-    setRenderFlag,
+  const [reloadFlag, setReloadFlag] = useState(1);
+  const reloadFlagMemo = useMemo(() => ({ reloadFlag, setReloadFlag }), [
+    reloadFlag,
+    setReloadFlag,
   ]);
 
-  // Get All Users and set them on state
   const [users, setUsers] = useState([]);
+  const usersMemo = useMemo(() => ({ users, setUsers }), [users, setUsers]);
   useEffect(() => {
-    async function fetchUsers() {
-      const result = await axios("http://localhost:4000/api/v1/user");
+    async function getUsers() {
+      const result = await UserController.getAllUsers();
       setUsers(result.data);
     }
-    fetchUsers();
-    // eslint-disable-next-line
-  }, [renderFlag]);
-  const usersData = useMemo(() => ({ users, setUsers }), [users, setUsers]);
+    getUsers();
+  }, [reloadFlag]);
 
-  // Get all Roles and set them on state
   const [roles, setRoles] = useState([]);
+  const rolesMemo = useMemo(() => ({ roles, setRoles }), [roles, setRoles]);
   useEffect(() => {
-    async function fetchRoles() {
-      const result = await axios.get("http://localhost:4000/api/v1/role");
+    async function getRoles() {
+      const result = await RoleController.getAllRoles();
       setRoles(result.data);
     }
-    fetchRoles();
-    // eslint-disable-next-line
+    getRoles();
   }, []);
-  const rolesData = useMemo(() => ({ roles, setRoles }), [roles, setRoles]);
 
-  // Initialize Dialog to false, to not show
-  const [userDialogOpen, setUserDialogOpen] = useState(false);
-  const userDialog = useMemo(() => ({ userDialogOpen, setUserDialogOpen }), [
-    userDialogOpen,
-    setUserDialogOpen,
-  ]);
-
-  // State handler for user selected
   const [userSelected, setUserSelected] = useState();
-  const currentUser = useMemo(() => ({ userSelected, setUserSelected }), [
+  const userSelectedMemo = useMemo(() => ({ userSelected, setUserSelected }), [
     userSelected,
     setUserSelected,
   ]);
 
-  // Set current action selected on state
   const [userAction, setUserAction] = useState();
-  const currentAction = useMemo(() => ({ userAction, setUserAction }), [
+  const userActionMemo = useMemo(() => ({ userAction, setUserAction }), [
     userAction,
     setUserAction,
   ]);
 
-  // Config the state initial value
   const intialValue = {
-    usersData,
-    rolesData,
-    userDialog,
-    currentUser,
-    currentAction,
-    currentRenderFlag,
+    reloadFlagMemo,
+    usersMemo,
+    rolesMemo,
+    userSelectedMemo,
+    userActionMemo,
   };
 
   return (
     <UserContext.Provider value={intialValue}>
-      <UserPage />
+      {
+        typeof users !== undefined
+          ? <UserPage />
+          : <CircularProgress />
+      }
     </UserContext.Provider>
   );
 };
